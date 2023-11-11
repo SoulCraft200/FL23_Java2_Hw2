@@ -8,54 +8,74 @@ Tests:
 */
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+
 public class PerfectSquare extends JFrame {
-    private JLabel results;
+    private TextArea results;
     private JLabel n;
     private JSlider slider;
     private JPanel panel;
+    private ButtonGroup buttonPanel;
+    private JPanel centerPanel;
+    private JRadioButton dec;
+    private JRadioButton ace;
+    private JRadioButton hnd;
     public PerfectSquare(){
         createcomponents();
     }
     private void createcomponents(){
         panel = new JPanel();
         panel.setLayout(new BorderLayout());
-        results = new JLabel("Results");
+        results = new TextArea("Results");
+        centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(1,4));
         panel.add(results,BorderLayout.NORTH);
-        n = new JLabel();
-        panel.add(n,BorderLayout.CENTER);
+        n = new JLabel("Number of PerfectSquares: ");
+        centerPanel.add(n);
+        ace= new JRadioButton("Ascending Order" , true);
+        dec= new JRadioButton("Descending Order" );
+        hnd= new JRadioButton("Highest Number of Digit Order" );
+        buttonPanel = new ButtonGroup();
+        buttonPanel.add(ace);
+        buttonPanel.add(dec);
+        buttonPanel.add(hnd);
+        centerPanel.add(ace);
+        centerPanel.add(dec);
+        centerPanel.add(hnd);
+        panel.add(centerPanel,BorderLayout.CENTER);
         slider = new JSlider(5,30,10);
         panel.add(slider,BorderLayout.SOUTH);
-        slider.addChangeListener(e -> {
-            int n = slider.getValue();
-            double[] list = IntStream
-                    .iterate(1,i -> i+1)
-                    .mapToDouble(i -> Math.pow(i,2))
-                    .filter(PerfectSquare::isPal)
-                    .limit(n)
-                    .toArray();
-            System.out.println(Arrays.toString(list));
-        });
+        slider.addChangeListener(e -> Update());
+        ace.addActionListener(e -> Update());
+        dec.addActionListener(e -> Update());
+        hnd.addActionListener(e -> Update());
         add(panel);
     }
-
-    public static boolean isPal(double num){
-        String val = String.valueOf(num);
-        int len = val.length();
-        boolean isPaln = true;
-        int count = 0;
-        for(int i = 0 ; i<Math.round((float) val.length()/2); i++){
-            if (val.charAt(i) != val.charAt((len - 1 - count))){
-                isPaln = false;
-                break;
-            }
-            count++;
+    public void Update(){
+        int n = slider.getValue();
+        this.n.setText(this.n.getText().substring(0,26)+String.valueOf(n));
+        IntStream s = IntStream
+                .iterate(1,i -> i+1)
+                .map(i -> i*i)
+                .filter(i -> i == Integer.parseInt(String.valueOf(new StringBuilder(String.valueOf(i)).reverse())))
+                .limit(n);
+        java.util.List<Integer> list = s.boxed().collect(Collectors.toList());
+        if(ace.isSelected()){
+            list = list.stream().sorted().toList();
+        } else if (dec.isSelected()) {
+            list = list.stream().sorted(Comparator.reverseOrder()).toList();
+        } else if (hnd.isSelected()) {
+            list = list.stream().sorted((a,b) ->
+                    Long.compare(String.valueOf(a).chars().distinct().count(), String.valueOf(b).chars().distinct().count())
+            ).toList();
         }
-        return isPaln;
+        results.setText(list.toString());
     }
 }

@@ -8,14 +8,16 @@ Tests:
 */
 
 import javax.swing.*;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
 public class Tester {
     public static void main(String[] args) {
         JFrame frame = new PerfectSquare();
-        frame.setSize(800,500);
+        frame.setSize(900,300);
         frame.setTitle("PerfectSquare Finder");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
-        System.out.println(PerfectSquare.isPal(12344321));
+
     }
 }
